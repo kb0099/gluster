@@ -1,0 +1,20 @@
+docker run  --name g2 --net netgfs \
+-v /home/me/wss/g2/etc/glusterfs:/etc/glusterfs:z \
+-v /home/me/wss/g2/var/lib/glusterd:/var/lib/glusterd:z \
+-v /home/me/wss/g2/var/log/glusterfs:/var/log/glusterfs:z \
+-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+-d --privileged=true \
+-v /home/me/wss/g2/data/gv0:/mnt/gv0 \
+ gluster/gluster-fedora
+
+
+
+ vs:
+docker run  --name g10 --net netgfs \
+-v /home/me/ws/gluster/appdir/systems/gl/g10/etc/glusterfs:/etc/glusterfs:z \
+-v /home/me/ws/gluster/appdir/systems/gl/g10/var/lib/glusterd:/var/lib/glusterd:z \
+-v /home/me/ws/gluster/appdir/systems/gl/g10/var/log/glusterfs:/var/log/glusterfs:z \
+-v /home/me/ws/gluster/appdir/systems/gl/g10/data/gv0:/mnt/gv0 \
+-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+-d --privileged=true \
+gluster/gluster-fedora
