@@ -23,9 +23,16 @@ logging.basicConfig()
 
 CURR_DIR = os.path.dirname(os.path.realpath(__file__))
 
-os.system('docker rm $(docker stop -t 0 $(docker ps -aq))')
-os.system('docker network create netgfs')
+glroot = CURR_DIR + "/appdir/systems/gl"
+wl_dirs = [glroot + "/g1/bricks/brick0", glroot + "/g2/bricks/brick0", glroot + "/g3/bricks/brick0"] # work_load direcctories
+
+print CURR_DIR
+
+invoke_cmd('docker rm $(docker stop -t 0 $(docker ps -aq))')
+os.system("sudo rm -rf %s"%glroot)
 time.sleep(5);
+invoke_cmd('docker network create netgfs')
+time.sleep(2);
 os.system('docker container prune -f')
 os.system('docker container prune -f')
 os.system('docker container prune -f')
@@ -34,13 +41,6 @@ os.system('docker container prune -f')
 os.system('docker container prune -f')
 time.sleep(2);
 os.system('docker ps -a')
-
-glroot = CURR_DIR + "/appdir/systems/gl"
-wl_dirs = [glroot + "/g1/bricks/brick0", glroot + "/g2/bricks/brick0", glroot + "/g3/bricks/brick0"] # work_load direcctories
-
-print CURR_DIR
-print "removing glroot: ", glroot;
-os.system("rm -rf %s"%glroot)
 
 dir00 = "%s/g1/etc/glusterfs" % glroot
 dir01 = "%s/g1/var/lib/glusterd" % glroot
@@ -220,8 +220,9 @@ os.system('docker exec -ti g1 bash -c "%s"' % "fgrep -o a /mnt/test_value | wc -
 os.system('docker exec -ti g2 bash -c "%s"' % "fgrep -o a /bricks/brick0/gv0/test_value | wc -l")
 os.system('docker exec -ti g3 bash -c "%s"' % "fgrep -o a /bricks/brick0/gv0/test_value | wc -l")
 
-raw_input("Stop and Prune? Any key : ^C")
+raw_input("Stop and Prune and rm -rf? Any key : ^C")
 os.system('docker rm $(docker stop -t 0 $(docker ps -aq))')
 time.sleep(5);
 my_cmd0 = "docker network rm netgfs"
-
+print "removing glroot: ", glroot;
+os.system("rm -rf %s"%glroot)
