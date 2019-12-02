@@ -1,0 +1,1 @@
+python ./gluster-read.py cords ./appdir/systems/gl/g1/bricks/brick0 ./appdir/systems/gl/g2/bricks/brick0  ./appdir/systems/gl/g3/bricks/brick0 
