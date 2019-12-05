@@ -1,2 +1,4 @@
 # ignore data, logs, etc.
 appdir
+trash
+local

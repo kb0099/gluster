@@ -15,7 +15,7 @@ def uppath(_path, n): return os.sep.join(_path.split(os.sep)[:-n])
 CURR_DIR = os.path.dirname(os.path.realpath(__file__))
 
 os.system('docker rm $(docker stop -t 0 $(docker ps -aq)) > /dev/null')
-#time.sleep(5)
+time.sleep(5)
 
 data_dirs = []
 server_logs = []
@@ -53,29 +53,16 @@ def invoke_cmd(cmd):
     out, err = p.communicate()
     return (out, err)
 
-glroot = uppath(data_dirs[0], 1)
-print "glroot = ", glroot
-
-#raw_input("exit?");
-
+glroot = uppath(data_dirs[0], 3)
 cid = [None]*3
 out = ''
 err = ''
 for i in range(0, len(data_dirs)):
-    dir00 = "%s/etc/glusterfs" % (data_dirs[i])
-    dir01 = "%s/var/lib/glusterd" % (data_dirs[i])
-    dir02 = "%s/var/log/glusterfs" % (data_dirs[i])
-    dir03 = "%s/bricks/brick0" % data_dirs[i]
-
-    print ("\n\nCreating the .mp dirs")
-    os.system("mkdir -p %s" % dir00);
-    os.system("mkdir -p %s" % dir01);
-    os.system("mkdir -p %s" % dir02);
-    os.system("mkdir -p %s" % dir03);
-    
-    #raw_input("check or exit?")
-
-    my_cmd1 = """sudo docker run  --name g%s --net netgfs \\
+    dir00 = "%s/g%s/etc/glusterfs" % (glroot, i+1)
+    dir01 = "%s/g%s/var/lib/glusterd" % (glroot, i+1)
+    dir02 = "%s/g%s/var/log/glusterfs" % (glroot, i+1)
+    dir03 = data_dirs[i]
+    my_cmd1 = """docker run  --name g%s --net netgfs \\
     -v %s:/etc/glusterfs:z \\
     -v %s:/var/lib/glusterd:z \\
     -v %s:/var/log/glusterfs:z \\
@@ -93,25 +80,25 @@ for i in range(0, len(data_dirs)):
     cid[i], err_ = invoke_cmd(docker_run)
     print "cid, err", cid[i], err_
     err += err_
-    #time.sleep(2)
+    time.sleep(2)
 
 
     assert cid[i] is not None
     assert err is None or len(err) == 0
 
 # All nodes have started! Do the workload.
-#time.sleep(5)
-inited_value = 'a' * 8192
+time.sleep(5)
+update_value = 'b' * 8192
 
 logger_log(log_dir, 'Before workload\n')
 to_write = ''
 
 
 # probe each other
-#time.sleep(5)
+time.sleep(5)
 probe1 = 'docker exec -ti g%s bash -c "gluster peer probe g%s.netgfs"' % (1, 2)
 os.system(probe1)
-#time.sleep(2)
+time.sleep(2)
 probe2 = 'docker exec -ti g%s bash -c "gluster peer probe g%s.netgfs"' % (1, 3)
 os.system(probe2)
 
@@ -134,14 +121,13 @@ server_i = 0
 out = ''
 
 for g in ["g1", "g2", "g3"]:
-    out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' %
-                            (g, "fgrep -o a /bricks/brick0/gv0/test_value | wc -l"))
+    out_, err_ = invoke_cmd("cd /bricks/brick0/gv0/test_value echo '%s' > test_value" %  update_value)
     if err_ is None or len(err_) == 0:
-        out += '\nSuccessfully read the value at server:' + \
+        out += '\nSuccessfully wrote the value at server:' + \
             g + "[" + out_ + "]" ' !\n'
     else:
         err += 'Exception occured:' + str(e) + ' at: ' + g + '\n'
-        #time.sleep(5)
+        time.sleep(5)
 
 logger_log(log_dir, out)
 logger_log(log_dir, err)
@@ -167,4 +153,4 @@ logger_log(log_dir, '----------------------------------------------\n')
 # os.system('docker rm $(docker stop -t 0 $(docker ps -aq)) > /dev/null')
 
 os.system('docker rm $(docker stop -t 0 $(docker ps -aq)) > /dev/null')
-#time.sleep(5)
+time.sleep(5)
