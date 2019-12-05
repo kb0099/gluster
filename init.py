@@ -1,4 +1,4 @@
-#!/usr/bin/env  python
+#!/usr/bin/env python2
 
 import sys
 import os
@@ -49,7 +49,7 @@ invoke_cmd("mkdir -p %s" % dir03)
 
 my_cmd0 = "docker network create netgfs"
 time.sleep(1);
-my_cmd1 = """docker run  --name g1 --net netgfs \\
+my_cmd1 = """docker run -d  --name g1 --net netgfs \\
 -v %s:/etc/glusterfs:z \\
 -v %s:/var/lib/glusterd:z \\
 -v %s:/var/log/glusterfs:z \\
@@ -85,7 +85,7 @@ os.system("mkdir -p %s" % dir03)
 
 #my_cmd0 = "docker network create netgfs"
 time.sleep(1);
-my_cmd1 = """docker run  --name g2 --net netgfs \\
+my_cmd1 = """docker run -d --name g2 --net netgfs \\
 -v %s:/etc/glusterfs:z \\
 -v %s:/var/lib/glusterd:z \\
 -v %s:/var/log/glusterfs:z \\
@@ -121,7 +121,7 @@ os.system("mkdir -p %s" % dir03)
 
 #my_cmd0 = "docker network create netgfs"
 time.sleep(1)
-my_cmd1 = """docker run  --name g3 --net netgfs \\
+my_cmd1 = """docker run -d --name g3 --net netgfs \\
 -v %s:/etc/glusterfs:z \\
 -v %s:/var/lib/glusterd:z \\
 -v %s:/var/log/glusterfs:z \\

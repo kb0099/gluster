@@ -1,5 +1,8 @@
 #! /bin/bash
 
+CURRENT_DIR=$PWD
+CORDS_DIR=/home/$USER/CORDS
+
 declare d1="a";
 declare d2="b";
 declare d3="c";
@@ -8,22 +11,24 @@ sudo rm -rf ./appdir
 # Some files don't want to get deleted -> move them
 mkdir -p ./trash
 mv ./appdir ./trash/appdir
-echo "\nOld files cleared."
+echo -e "\nOld files cleared."
 
-echo "\nIniting"
-python ./init.py
+echo -e "\nIniting"
+./init.py
 
-mv ../gluster/appdir/systems/gl/g1 ../gluster/appdir/systems/gl/$d1
-mv ../gluster/appdir/systems/gl/g2 ../gluster/appdir/systems/gl/$d2
-mv ../gluster/appdir/systems/gl/g3 ../gluster/appdir/systems/gl/$d3
+mv $CURRENT_DIR/appdir/systems/gl/g1 $CURRENT_DIR/appdir/systems/gl/$d1
+mv $CURRENT_DIR/appdir/systems/gl/g2 $CURRENT_DIR/appdir/systems/gl/$d2
+mv $CURRENT_DIR/appdir/systems/gl/g3 $CURRENT_DIR/appdir/systems/gl/$d3
 
 docker rm $(docker stop -t 0 $(docker ps -aq))
 
-echo "\nTracing now..."
-cd ../CORDS
-./trace.py --trace_files \
-    ../gluster/appdir/systems/gl/t/trace0 ../gluster/appdir/systems/gl/t/trace1 ../gluster/appdir/systems/gl/t/trace2 --data_dirs \
-    ../gluster/appdir/systems/gl/$d1 ../gluster/appdir/systems/gl/$d2 ../gluster/appdir/systems/gl/$d3 \
-    --workload_command ../gluster/gluster_read.py --ignore_file ../gluster/ignore
+mkdir -p $CURRENT_DIR/appdir/systems/gl/t
 
-echo "\nTracing complete..."
+echo -e "\nTracing now..."
+cd $CORDS_DIR
+./trace.py --trace_files \
+    $CURRENT_DIR/appdir/systems/gl/t/trace0 $CURRENT_DIR/appdir/systems/gl/t/trace1 $CURRENT_DIR/appdir/systems/gl/t/trace2 --data_dirs \
+    $CURRENT_DIR/appdir/systems/gl/$d1 $CURRENT_DIR/appdir/systems/gl/$d2 $CURRENT_DIR/appdir/systems/gl/$d3 \
+    --workload_command $CURRENT_DIR/gluster_read.py --ignore_file $CURRENT_DIR/ignore
+
+echo -e "\nTracing complete..."
