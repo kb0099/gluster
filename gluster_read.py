@@ -53,7 +53,8 @@ def invoke_cmd(cmd):
     out, err = p.communicate()
     return (out, err)
 
-glroot = uppath(data_dirs[0], 1)
+# ../gluster/appdir/systems/gl/g1/bricks/brick0
+glroot = uppath(data_dirs[0], 3)
 print "glroot = ", glroot
 
 #raw_input("exit?");
@@ -62,20 +63,11 @@ cid = [None]*3
 out = ''
 err = ''
 for i in range(0, len(data_dirs)):
-    dir00 = "%s/etc/glusterfs" % (data_dirs[i])
-    dir01 = "%s/var/lib/glusterd" % (data_dirs[i])
-    dir02 = "%s/var/log/glusterfs" % (data_dirs[i])
-    dir03 = "%s/bricks/brick0" % data_dirs[i]
-
-    print ("\n\nCreating the .mp dirs")
-    os.system("mkdir -p %s" % dir00);
-    os.system("mkdir -p %s" % dir01);
-    os.system("mkdir -p %s" % dir02);
-    os.system("mkdir -p %s" % dir03);
-    
-    #raw_input("check or exit?")
-
-    my_cmd1 = """sudo docker run  --name g%s --net netgfs \\
+    dir00 = "%s/g%s/etc/glusterfs" % (glroot, i+1)
+    dir01 = "%s/g%s/var/lib/glusterd" % (glroot, i+1)
+    dir02 = "%s/g%s/var/log/glusterfs" % (glroot, i+1)
+    dir03 = data_dirs[i]
+    my_cmd1 = """docker run  --name g%s --net netgfs \\
     -v %s:/etc/glusterfs:z \\
     -v %s:/var/lib/glusterd:z \\
     -v %s:/var/log/glusterfs:z \\

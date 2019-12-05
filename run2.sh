@@ -23,7 +23,7 @@ echo "\nTracing now..."
 cd ../CORDS
 ./trace.py --trace_files \
     ../gluster/appdir/systems/gl/t/trace0 ../gluster/appdir/systems/gl/t/trace1 ../gluster/appdir/systems/gl/t/trace2 --data_dirs \
-    ../gluster/appdir/systems/gl/$d1/bricks/brick0 ../gluster/appdir/systems/gl/$d2/bricks/brick0 ../gluster/appdir/systems/gl/$d3/bricks/brick0 \
+    ../gluster/appdir/systems/gl/$d1 ../gluster/appdir/systems/gl/$d2 ../gluster/appdir/systems/gl/$d3 \
     --workload_command ../gluster/gluster_read.py --ignore_file ../gluster/ignore
 
 echo "\nTracing complete..."
