@@ -55,7 +55,7 @@ my_cmd1 = """docker run -d  --name g1 --net netgfs \\
 -v %s:/var/log/glusterfs:z \\
 -v %s:/bricks/brick0 \\
 -v /sys/fs/cgroup:/sys/fs/cgroup:ro \\
--d --privileged=true \\
+--privileged=true \\
 gluster/gluster-fedora"""
 
 my_cmd1 = my_cmd1 % (dir00, dir01, dir02, dir03)
@@ -91,7 +91,7 @@ my_cmd1 = """docker run -d --name g2 --net netgfs \\
 -v %s:/var/log/glusterfs:z \\
 -v %s:/bricks/brick0 \\
 -v /sys/fs/cgroup:/sys/fs/cgroup:ro \\
--d --privileged=true \\
+--privileged=true \\
 gluster/gluster-fedora"""
 
 my_cmd1 = my_cmd1 % (dir00, dir01, dir02, dir03)
@@ -127,7 +127,7 @@ my_cmd1 = """docker run -d --name g3 --net netgfs \\
 -v %s:/var/log/glusterfs:z \\
 -v %s:/bricks/brick0 \\
 -v /sys/fs/cgroup:/sys/fs/cgroup:ro \\
--d --privileged=true \\
+--privileged=true \\
 gluster/gluster-fedora"""
 
 my_cmd1 = my_cmd1 % (dir00, dir01, dir02, dir03)
