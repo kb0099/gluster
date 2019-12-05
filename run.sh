@@ -1,7 +1,7 @@
 #! /bin/bash
 
 CURRENT_DIR=$PWD
-CORDS_DIR=/home/$USER/CORDS
+CORDS_DIR=$(realpath ../..)
 
 declare d1="a";
 declare d2="b";
