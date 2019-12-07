@@ -19,11 +19,36 @@ mv ../gluster/appdir/systems/gl/g3 ../gluster/appdir/systems/gl/$d3
 
 docker rm $(docker stop -t 0 $(docker ps -aq))
 
-echo "\nTracing now..."
+echo "\nTracing now... "
 cd ../CORDS
 ./trace.py --trace_files \
-    ../gluster/appdir/systems/gl/t/trace0 ../gluster/appdir/systems/gl/t/trace1 ../gluster/appdir/systems/gl/t/trace2 --data_dirs \
+    ./trace0 ./trace1 ./trace2 --data_dirs \
     ../gluster/appdir/systems/gl/$d1 ../gluster/appdir/systems/gl/$d2 ../gluster/appdir/systems/gl/$d3 \
     --workload_command ../gluster/gluster_read.py --ignore_file ../gluster/ignore
 
-echo "\nTracing complete..."
+echo "\nTracing complete... "
+
+echo "\nTrying to unmount again if still mounted. "
+
+cd ../gluster/appdir/systems/gl
+fusermount -u $d1.mp
+fusermount -u $d3.mp
+fusermount -u $d2.mp
+
+
+sudo fusermount -u $d1.mp
+sudo fusermount -u $d3.mp
+sudo fusermount -u $d2.mp
+
+sudo umount -l $d2.mp
+sudo umount -l $d1.mp
+sudo umount -l $d3.mp
+
+
+sudo umount -f $d1.mp
+sudo umount -f $d2.mp
+sudo umount -f $d3.mp
+
+echo "\n Should be done!"
+
+
