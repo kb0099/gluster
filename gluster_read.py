@@ -71,11 +71,11 @@ for i in range(0, len(data_dirs)):
     dir02 = "%s/var/log/glusterfs" % (data_dirs[i])
     dir03 = "%s/bricks/brick0" % data_dirs[i]
 
-    print ("\n\nCreating the .mp dirs")
-    os.system("mkdir -p %s" % dir00);
-    os.system("mkdir -p %s" % dir01);
-    os.system("mkdir -p %s" % dir02);
-    os.system("mkdir -p %s" % dir03);
+    # print ("\n\nCreating the .mp dirs")
+    # os.system("mkdir -p %s" % dir00);
+    # os.system("mkdir -p %s" % dir01);
+    # os.system("mkdir -p %s" % dir02);
+    # os.system("mkdir -p %s" % dir03);
     
     #raw_input("check or exit?")
 
@@ -114,14 +114,37 @@ out = ''
 # probe each other
 #time.sleep(5)
 probe1 = 'docker exec -ti g%s bash -c "gluster peer probe g%s.netgfs"' % (1, 2)
-os.system(probe1)
+invoke_cmd(probe1)
 #time.sleep(2)
 probe2 = 'docker exec -ti g%s bash -c "gluster peer probe g%s.netgfs"' % (1, 3)
-os.system(probe2)
+invoke_cmd(probe2)
 
 probe3 = 'docker exec -ti g%s bash -c "gluster peer probe g%s.netgfs"' % (3, 1)
-os.system(probe3)
+invoke_cmd(probe3)
 
+
+
+create_v = ("gluster volume create gv0 replica 3 g1.netgfs:/bricks/brick0/gv0 g2.netgfs:/bricks/brick0/gv0 g3.netgfs:/bricks/brick0/gv0")
+start_v = ("gluster volume start gv0 force")
+info_v = ("gluster volume status")
+
+os.system('docker exec -ti g1 bash -c "%s"' % create_v)
+os.system('docker exec -ti g1 bash -c "%s"' % start_v)
+os.system('docker exec -ti g1 bash -c "%s"' % info_v)
+
+
+#
+# test
+# 
+
+mount_v1 = "mount -t glusterfs g1:/gv0 /mnt"
+mount_v2 = "mount -t glusterfs g2:/gv0 /mnt"
+mount_v3 = "mount -t glusterfs g3:/gv0 /mnt"
+os.system('docker exec -ti g1 bash -c "%s"' % mount_v1)
+os.system('docker exec -ti g2 bash -c "%s"' % mount_v2)
+os.system('docker exec -ti g3 bash -c "%s"' % mount_v3)
+
+raw_input("\n\nmanually try\n\n -------------");
 
 #os.system('docker exec -ti g1 bash -c "gluster peer status"')
 # out += "g1:: " + out_ + " " + err_
@@ -152,10 +175,10 @@ for g in ["g1", "g2", "g3"]:
                 #print "line = ", process_line
                 is_running[g] = True
 
-print "is_running = ", is_running
+#print "is_running = ", is_running
 for g in [x for x in ["g1", "g2", "g3"] if is_running[x]]:
     out += "Server %s is running.\n" % g
-    print "in loop: out = ", out
+    #print "in loop: out = ", out
 
 logger_log(log_dir, out)
 logger_log(log_dir, '----------------------------------------------\n')
@@ -171,19 +194,32 @@ failure_str = "Connection failed. Please check if gluster daemon is operational.
 
 
 for g in [x for x in ["g1", "g2", "g3"] if is_running[x]]:
-    out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' %
-                            (g, "fgrep -o a /bricks/brick0/gv0/test_value | wc -l"))
+    #out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' % (g, "fgrep -o a /bricks/brick0/gv0/test_value | wc -l"))
+   
+    out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' % (g, "cat /bricks/brick0/gv0/test_value"))
+    iv_count = out_.count('a')
     if err_ is None or len(err_) == 0:
-        print "\n\n--------------------------------------"
-        out_ =  out_.strip().replace('\n', '')
-        print "stripped out = ", out_, "type = ", type(out_)
-        if out_ == "8192":
+        #print "\n\n--------------------------------------"
+        #out_ =  out_.strip().replace('\n', '')
+        #print "stripped out = ", out_, "type = ", type(out_)
+        if iv_count == 8192:
             out += '\n%s:: Successfully read the value.\n' % g
         else:
             if failure_str in out_:
                 out += "\n%s:: Server not running. Not connecting.\n"
             else:
-                out += '\n%s:: Problem at the server : wrong value.\n' % g
+                out += '\n%s:: Problem at the server : wrong value: %s.\n' % (g, iv_count)
+                out += "\noutput and error: \n"
+                out += "out_: [%s]\n\nerr: [%s]" % (out_, err_)
+                out += "\n\nNow Checking the Volume for Errors. \n"
+                out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' % ("g1", "fgrep -o a /mnt/test_value | wc -l"))
+                out += "vol1:: %s\n" % out_
+                out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' % ("g2", "fgrep -o a /mnt/test_value | wc -l"))
+                out += "vol2:: %s\n" % out_
+                out_, err_ = invoke_cmd('docker exec -ti %s bash -c "%s"' % ("g3", "fgrep -o a /mnt/test_value | wc -l"))
+                out += "vol3:: %s\n" % out_
+                #act_out, act_err = invoke_cmd('docker exec -ti %s bash -c "cat /bricks/brick0/gv0/test_value"' % g);
+                #out += "\nactual output = %s and err = %s\n" % (act_out, act_err)
     else:
         err += ("\ng%s:: Exception occured:" % g) + str(err_) + "\n"
         
@@ -218,10 +254,10 @@ for g in ["g1", "g2", "g3"]:
                 #print "line = ", process_line
                 is_running[g] = True
 
-print "is_running = ", is_running
+#print "is_running = ", is_running
 for g in [x for x in ["g1", "g2", "g3"] if is_running[x]]:
     out += "Server %s is running.\n" % g
-    print "in loop: out = ", out
+    #print "in loop: out = ", out
 
 logger_log(log_dir, out)
 logger_log(log_dir, '----------------------------------------------\n')
