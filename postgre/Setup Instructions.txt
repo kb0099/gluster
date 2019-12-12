@@ -1,0 +1,85 @@
+
+# master
+sudo -H -u postgres ssh-keygen
+
+# slave
+sudo -H -u postgres ssh-keygen
+
+# master
+cat /var/lib/postgresql/.ssh/id_rsa.pub
+
+# slave
+cat /var/lib/postgresql/.ssh/id_rsa.pub
+
+
+# master
+echo "echo \""`cat /var/lib/postgresql/.ssh/id_rsa.pub`"\" >> /var/lib/postgresql/.ssh/authorized_keys"
+echo "ssh-rsa AAABBBCCCDDDEEE[....] postgres@primary" >> /var/lib/postgresql/.ssh/authorized_keys
+
+
+# slave
+echo "echo \""`cat /var/lib/postgresql/.ssh/id_rsa.pub`"\" >> /var/lib/postgresql/.ssh/authorized_keys"
+echo "ssh-rsa AAABBBCCCDDDEEE[....] postgres@replica" >> /var/lib/postgresql/.ssh/authorized_keys
+
+# 
+# master
+#
+sudo bash
+su postgres
+psql
+
+postgres=# CREATE USER replication REPLICATION LOGIN CONNECTION LIMIT 5 ENCRYPTED PASSWORD 'my_secret_password';
+CREATE ROLE
+
+nano /etc/postgresql/12/main/pg_hba.conf
+
+# need to append this line at the end with correct IP
+host    replication     replication     [REPLIACA_IP]/32          md5
+
+
+emacs /etc/postgresql/12/main/postgresql.conf
+# and edit the following
+listen_addresses = 'localhost,[IP_ADDRESS_OF_PRIMARY_ON_LAN]'              # what IP address(es) to listen on; 
+wal_level = 'replica'
+archive_mode = on
+archive_command = 'cd .'
+max_wal_senders = 5
+primary_conninfo = 'host=[REPLICA_IP] port=5432 user=replication password=[REPLICATION PASSWORD]'
+hot_standby = on
+
+# restart postgre
+service postgresql restart
+
+# verify it started
+tail /var/log/postgresql/postgresql-12-main.log
+
+#
+# Slave
+#
+ service postgresql stop
+emacs /etc/postgresql/12/main/pg_hba.conf
+# and append with correct IP
+host    replication     replication     [PRIMARY_IP]/32          md5
+
+emacs /etc/postgresql/12/main/postgresql.conf
+listen_addresses = 'localhost,[IP_ADDRESS_OF_REPLIACA_ON_LAN]'              # what IP address(es) to listen on; 
+max_connections = 100 # Ensure that this value is the same as the primary's
+wal_level = 'replica'
+archive_mode = on
+archive_command = 'cd .'
+max_wal_senders = 5
+primary_conninfo = 'host=[PRIMARY_IP] port=5432 user=replication password=[REPLICATION PASSWORD]'
+hot_standby = on
+
+# backup
+su postgres
+mv /var/lib/postgresql/12/main 
+/var/lib/postgresql/12/main_old
+
+ sudo -u postgres pg_basebackup -h [PRIMARY_IP] -D /var/lib/postgresql/12/main -U replication -P -v
+# Password: # Type the replication password defined earlier on the primary
+# 28811/28811 kB (100%), 1/1 tablespace                                         
+# NOTICE:  pg_stop_backup complete, all required WAL segments have been archived
+# pg_basebackup: base backup completed
+
+
