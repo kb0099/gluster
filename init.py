@@ -194,6 +194,7 @@ os.system('docker exec -ti g1 bash -c "%s"' % create_v)
 os.system('docker exec -ti g1 bash -c "%s"' % start_v)
 os.system('docker exec -ti g1 bash -c "%s"' % info_v)
 
+raw_input("Pause and chedk");
 
 #
 # test

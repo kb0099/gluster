@@ -224,4 +224,4 @@ os.system('docker exec -ti g3 bash -c "%s"' % "ls -lA /bricks/brick0/gv0/copy* |
 raw_input("Stop and Prune? Any key : ^C")
 os.system('docker rm $(docker stop -t 0 $(docker ps -aq))')
 time.sleep(5);
-my_cmd0 = "docker network rm netgfs"
+#my_cmd0 = "docker network rm netgfs"
